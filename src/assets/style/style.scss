@@ -111,7 +111,8 @@
       height: 40px;
       border-radius: 5px;
       text-align: center;
-      padding-top: 10px;
+      // padding-top: 10px;
+      font-size: 15px;
       font-weight: 500;
       color: white;
       background-color: #090963;
@@ -207,7 +208,7 @@
         background-color: #090963;
         border: none;
         position: relative;
-        font-size: 17px;
+        font-size: 15px;
         margin-top: 20px;
         margin-bottom: 20px;
       }
@@ -227,5 +228,15 @@
         text-decoration: underline;
       }
     }
+  }
+}
+
+// header
+header {
+  .profile-box {
+    width: 30px;
+    height: 30px;
+    background-color: lightgray;
+    border-radius: 50%;
   }
 }

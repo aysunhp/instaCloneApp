@@ -23,7 +23,9 @@ export default function Login() {
       <Grid container style={{ padding: "0px" }}>
         <Grid xs={5} style={{ padding: "0px" }}>
           <div className="container">
-            <div className="logo">Logo</div>
+            <div className="logo" style={{ fontSize: "35px" }}>
+              Logo
+            </div>
             <h1 className="welcome">Welcome Back</h1>
 
             <div className="login-google">
@@ -66,10 +68,12 @@ export default function Login() {
                   .post("http://localhost:5000/login/", values)
                   .then((res) => {
                     console.log(res.data);
-                    localStorage.setItem("token", res.data);
 
-                    dispatch(login(true));
-                    navigate("/");
+                    if (res.status == 200) {
+                      localStorage.setItem("token", res.data);
+                      dispatch(login(true));
+                      navigate("/");
+                    }
                   });
               }}
             >

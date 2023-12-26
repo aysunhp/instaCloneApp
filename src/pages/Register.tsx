@@ -17,6 +17,7 @@ interface Values {
 
 const Register = () => {
   const navigate = useNavigate();
+
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -43,10 +44,7 @@ const Register = () => {
                   }}
                   onSubmit={(values: Values) => {
                     let id = uuidv4();
-                    console.log({
-                      ...values,
-                      id,
-                    });
+
                     let obj = {
                       ...values,
                       id,
