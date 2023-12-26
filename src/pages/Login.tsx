@@ -1,18 +1,23 @@
-import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Unstable_Grid2";
 import "./../assets/style/style.scss";
+import { Formik, Form, Field } from "formik";
+import axios from "axios";
+import { login } from "./../redux/slice/userSlice";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
+interface MyFormValues {
+  userName: string;
+  password: string;
+}
 
 export default function Login() {
+  const initialValues: MyFormValues = { password: "", userName: "" };
+  // const isLogin = useSelector((state: RootState) => state.user.isLogin);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Grid container style={{ padding: "0px" }}>
@@ -51,45 +56,73 @@ export default function Login() {
             </div>
             <div className="divider">
               <div className="line"></div>
-              <span>Or login with email</span>
+              <span>Or login with username</span>
               <div className="line"></div>
             </div>
-            <input type="text" className="email" placeholder="Your Email" />
-            <input
-              type="text"
-              className="password"
-              placeholder="Your Password"
-            />
-            <div className="forgot-keep">
-              <div className="checkbox">
-                <input
-                  type="checkbox"
-                  className="  keep-me-loged-btn"
-                  id="keep-me-loged-btn"
+            <Formik
+              initialValues={initialValues}
+              onSubmit={(values) => {
+                axios
+                  .post("http://localhost:5000/login/", values)
+                  .then((res) => {
+                    console.log(res.data);
+                    localStorage.setItem("token", res.data);
+
+                    dispatch(login(true));
+                    navigate("/");
+                  });
+              }}
+            >
+              <Form>
+                <Field
+                  type="text"
+                  className="userName"
+                  id="userName"
+                  name="userName"
+                  placeholder="Your Username"
                 />
-                <label htmlFor="keep-me-loged-btn">Keep me logged in</label>
-              </div>
-              <span className="forgotPass">Forgot password</span>
-            </div>
-            <div className="log-in">
-              Log in
-              <svg
-                className="arrow-left"
-                xmlns="http://www.w3.org/2000/svg"
-                height="16"
-                width="26"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  d="M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l370.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"
-                  fill="white"
+                <Field
+                  type="text"
+                  id="password"
+                  name="password"
+                  className="password"
+                  placeholder="Your Password"
                 />
-              </svg>
-            </div>
+                <div className="forgot-keep">
+                  <div className="checkbox">
+                    <Field
+                      type="checkbox"
+                      className="  keep-me-loged-btn"
+                      id="keep-me-loged-btn"
+                    />
+                    <label htmlFor="keep-me-loged-btn">Keep me logged in</label>
+                  </div>
+                  <span className="forgotPass">Forgot password</span>
+                </div>
+                <button type="submit" className="log-in">
+                  Log in
+                  <svg
+                    className="arrow-left"
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="16"
+                    width="26"
+                    viewBox="0 0 512 512"
+                  >
+                    <path
+                      d="M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l370.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"
+                      fill="white"
+                    />
+                  </svg>
+                </button>
+              </Form>
+            </Formik>
             <div className="line"></div>
             <p>
               Don't have an account yet?{" "}
-              <span className="sign-up">Sign up</span>
+              <Link to="/register">
+                {" "}
+                <span className="sign-up">Sign up</span>
+              </Link>
             </p>
           </div>
         </Grid>
