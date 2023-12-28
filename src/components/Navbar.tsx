@@ -1,200 +1,396 @@
-// import React from "react";
-// import "./../assets/style/style.scss";
-// type Props = {};
-
-// const Navbar = (props: Props) => {
-//   return (
-//     <>
-//       <header>
-//         <div className="container">
-//           <div className="logo">Dreamy</div>
-//           <input type="text" placeholder="Search..." />
-//           <div className="icons">
-//             <div className="svg-wrapper">
-//               <svg
-//                 className="icon-svg"
-//                 xmlns="http://www.w3.org/2000/svg"
-//                 height="25"
-//                 width="25"
-//                 viewBox="0 0 448 512"
-//               >
-//                 <path d="M224 0c-17.7 0-32 14.3-32 32V51.2C119 66 64 130.6 64 208v18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416H416c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8V208c0-77.4-55-142-128-156.8V32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z" />
-//               </svg>
-//             </div>
-//             <div className="svg-wrapper">
-//               <svg
-//                 xmlns="http://www.w3.org/2000/svg"
-//                 height="25"
-//                 width="25"
-//                 viewBox="0 0 512 512"
-//               >
-//                 <path d="M64 0C28.7 0 0 28.7 0 64V352c0 35.3 28.7 64 64 64h96v80c0 6.1 3.4 11.6 8.8 14.3s11.9 2.1 16.8-1.5L309.3 416H448c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64z" />
-//               </svg>
-//             </div>
-
-//             <div className="profile-box"></div>
-//           </div>
-//         </div>
-//       </header>
-//     </>
-//   );
-// };
-
-// export default Navbar;
-
 import * as React from "react";
+import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
+import InputBase from "@mui/material/InputBase";
+import Badge from "@mui/material/Badge";
+import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
-import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
-import MenuItem from "@mui/material/MenuItem";
-import AdbIcon from "@mui/icons-material/Adb";
+import SearchIcon from "@mui/icons-material/Search";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import MailIcon from "@mui/icons-material/Mail";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import { Link } from "react-router-dom";
+import {
+  User,
+  followUser,
+  getAllUsers,
+  getUser,
+} from "../redux/slice/userSlice";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/store/store";
 
-function Navbar() {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+const Search = styled("div")(({ theme }) => ({
+  position: "relative",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginRight: theme.spacing(2),
+  marginLeft: 0,
+  width: "100%",
+  [theme.breakpoints.up("sm")]: {
+    marginLeft: theme.spacing(3),
+    width: "auto",
+  },
+}));
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
+const SearchIconWrapper = styled("div")(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: "100%",
+  position: "absolute",
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: "inherit",
+  "& .MuiInputBase-input": {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create("width"),
+    width: "100%",
+    [theme.breakpoints.up("md")]: {
+      width: "20ch",
+    },
+  },
+}));
+
+export default function Navbar() {
+  const dispatch = useDispatch();
+  const [data, setData] = React.useState<User[]>([]);
+  const [disp, setDisp] = React.useState<string>("none");
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+
+  const isMenuOpen = Boolean(anchorEl);
+  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const handleMobileMenuClose = () => {
+    setMobileMoreAnchorEl(null);
+    console.log("handleMobileMenuClose");
+    console.log(mobileMoreAnchorEl);
   };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
+
+  const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setMobileMoreAnchorEl(event.currentTarget);
+    console.log("handleMobileMenuOpen");
+    console.log(mobileMoreAnchorEl);
   };
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
+  const menuId = "primary-search-account-menu";
+  const renderMenu = (
+    <Menu
+      anchorEl={anchorEl}
+      anchorOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
+      id={menuId}
+      keepMounted
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
+      open={isMenuOpen}
+    ></Menu>
+  );
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+  const mobileMenuId = "primary-search-account-menu-mobile";
+  const renderMobileMenu = (
+    <Menu
+      anchorEl={mobileMoreAnchorEl}
+      anchorOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
+      id={mobileMenuId}
+      keepMounted
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
+      open={isMobileMenuOpen}
+      onClose={handleMobileMenuClose}
+      style={{ position: "absolute", top: "9.8%", left: "-1.7%" }}
+    >
+      <MenuItem>
+        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
+          <Badge badgeContent={4} color="error">
+            <MailIcon />
+          </Badge>
+        </IconButton>
+        <p>Messages</p>
+      </MenuItem>
+      <MenuItem>
+        <IconButton
+          size="large"
+          aria-label="show 0 new notifications"
+          color="inherit"
+        >
+          <Badge badgeContent={0} color="error">
+            <NotificationsIcon />
+          </Badge>
+        </IconButton>
+        <p>Notifications</p>
+      </MenuItem>
+      <MenuItem>
+        <IconButton
+          size="large"
+          aria-label="account of current user"
+          aria-controls="primary-search-account-menu"
+          aria-haspopup="true"
+          color="inherit"
+        >
+          <AccountCircle />
+        </IconButton>
+        <p>Profile</p>
+      </MenuItem>
+    </Menu>
+  );
 
+  const user: User[] = useSelector((state: RootState) => state.user.user);
+  React.useEffect(() => {
+    dispatch(getAllUsers());
+    dispatch(getUser());
+  }, [dispatch]);
+
+  console.log(user);
   return (
-    <div className="header">
-      <AppBar position="static" style={{ backgroundColor: "white" }}>
-        <Container maxWidth="xl">
-          <Toolbar
-            disableGutters
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Typography
-              variant="h6"
-              noWrap
-              component="a"
-              href="#app-bar-with-responsive-menu"
-              sx={{
-                mr: 2,
-                // display: { xs: "none", md: "flex" },
-                fontFamily: "Mulish",
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
-                fontSize: "25px",
-                color: "lightgray",
-              }}
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar
+        position="sticky"
+        style={{
+          backgroundColor: "#f4faff",
+          boxShadow: "rgba(149, 157, 165, 0.2) 0px 8px 24px",
+        }}
+      >
+        <Toolbar>
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <IconButton
+              size="large"
+              aria-label="show more"
+              aria-controls={mobileMenuId}
+              aria-haspopup="true"
+              onClick={handleMobileMenuOpen}
+              color="inherit"
+              style={{ padding: "0px" }}
             >
-              Dreamy
-            </Typography>
+              <MenuIcon
+                style={{
+                  color: "#5a189a",
+                  padding: "0px",
+                  width: "24px",
+                  height: "24px",
+                  marginRight: "5px",
+                }}
+              />
+            </IconButton>
+          </Box>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ display: { sm: "block" } }}
+            style={{ color: "#5a189a", fontFamily: "Mulish" }}
+          >
+            DREAMY
+          </Typography>
+          <Search
+            sx={{ display: { xs: "none", md: "block" } }}
+            style={{ width: "70%", backgroundColor: "#ede6ff" }}
+          >
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Search…"
+              inputProps={{ "aria-label": "search" }}
+              onChange={(e) => {
+                if (e.target.value.trim() == "") {
+                  axios.get(`http://localhost:5000/users`).then((res) => {
+                    setData(res.data);
+                  });
+                } else {
+                  axios
+                    .get(
+                      `http://localhost:5000/users/?userName=${e.target.value}`
+                    )
+                    .then((res) => {
+                      setData(res.data);
 
-            <Box sx={{ flexGrow: 0 }}>
-              <Tooltip
-                title="Open settings"
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  backgroundColor: "lightgray",
-                }}
-              >
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <svg
-                    className="icon-svg"
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="20"
-                    width="20"
-                    viewBox="0 0 448 512"
+                      setDisp("block");
+                    });
+                }
+              }}
+            />
+            <Box>
+              <div className="home-searched-user" style={{ display: disp }}>
+                <div
+                  className="top-open"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "10px",
+                  }}
+                >
+                  <span> Searced users:</span>
+                  <div
+                    className="block"
+                    onClick={() => {
+                      setDisp("none");
+                    }}
                   >
-                    <path
-                      d="M224 0c-17.7 0-32 14.3-32 32V51.2C119 66 64 130.6 64 208v18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416H416c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8V208c0-77.4-55-142-128-156.8V32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"
-                      fill="white"
-                    />
-                  </svg>
-                </IconButton>
-              </Tooltip>
-              <Tooltip
-                title="Open settings"
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  backgroundColor: "lightgray",
-                }}
-              >
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    height="20"
-                    width="20"
-                    viewBox="0 0 512 512"
-                  >
-                    <path
-                      d="M64 0C28.7 0 0 28.7 0 64V352c0 35.3 28.7 64 64 64h96v80c0 6.1 3.4 11.6 8.8 14.3s11.9 2.1 16.8-1.5L309.3 416H448c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64z"
-                      fill="white"
-                    />
-                    //{" "}
-                  </svg>
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <div className="profile-box"></div>
-                </IconButton>
-              </Tooltip>
-              {/* <Menu
-                sx={{ mt: "45px" }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                style={{ color: "lightgray" }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-              ></Menu> */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="16"
+                      width="16"
+                      viewBox="0 0 384 512"
+                    >
+                      <path d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z" />
+                    </svg>
+                  </div>
+                </div>
+                {data &&
+                  data.map((item) => {
+                    return (
+                      <div className="suggested-user" key={item.id}>
+                        <div className="about-user">
+                          <div className="user-img">
+                            <img src={item.userImage} alt={item.name} />
+                          </div>
+                          <div className="userName-follower">
+                            <div className="username">
+                              {item.name} {item.surname}
+                            </div>
+                            <div className="follower-count">
+                              {item.follower.length}
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className="follow-btn"
+                          onClick={() => {
+                            dispatch(followUser(item.id));
+                          }}
+                        >
+                          Follow
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
             </Box>
+          </Search>
 
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ display: { md: "flex" } }}>
+            <Link to="/direct">
               <IconButton
                 size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleOpenNavMenu}
-                color="lightgray"
+                aria-label="show 4 new mails"
+                color="inherit"
+                style={{ padding: "0px" }}
               >
-                <MenuIcon />
+                <Badge badgeContent={0} color="error">
+                  <MailIcon
+                    style={{
+                      color: "#5a189a",
+                      padding: "0px",
+                      width: "24px",
+                      height: "24px",
+                      marginRight: "5px",
+                    }}
+                  />
+                </Badge>
               </IconButton>
-            </Box>
-          </Toolbar>
-        </Container>
+            </Link>
+            <Link to="/notifications">
+              <IconButton
+                size="large"
+                aria-label="show 17 new notifications"
+                color="inherit"
+                style={{ padding: "0px" }}
+              >
+                <Badge badgeContent={0} color="error">
+                  <NotificationsIcon
+                    style={{
+                      color: "#5a189a",
+                      padding: "0px",
+                      width: "24px",
+                      height: "24px",
+                      marginRight: "5px",
+                    }}
+                  />
+                </Badge>
+              </IconButton>
+            </Link>
+
+            <Link to="/profile">
+              <IconButton
+                size="large"
+                edge="end"
+                aria-label="account of current user"
+                aria-controls={menuId}
+                aria-haspopup="true"
+                color="inherit"
+                style={{ padding: "0px" }}
+              >
+                <div
+                  className="account-img-wrapper"
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "50%",
+                    backgroundColor: "#5a189a",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginRight: "10px",
+                  }}
+                >
+                  <div
+                    className="account-logo"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <img
+                      style={{
+                        width: "93%",
+                        height: " 93%",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                      }}
+                      src={user.userImage}
+                      alt={user.userName}
+                    />
+                  </div>
+                </div>
+              </IconButton>
+            </Link>
+          </Box>
+        </Toolbar>
       </AppBar>
-    </div>
+      {renderMobileMenu}
+      {renderMenu}
+    </Box>
   );
 }
-export default Navbar;

@@ -4,6 +4,7 @@ import "./../assets/style/style.scss";
 import { Formik, Form, Field } from "formik";
 import axios from "axios";
 import { login } from "./../redux/slice/userSlice";
+import { loginUser } from "./../redux/slice/userSlice";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -64,6 +65,8 @@ export default function Login() {
             <Formik
               initialValues={initialValues}
               onSubmit={(values) => {
+                localStorage.setItem("user", JSON.stringify(values));
+
                 axios
                   .post("http://localhost:5000/login/", values)
                   .then((res) => {
@@ -72,6 +75,7 @@ export default function Login() {
                     if (res.status == 200) {
                       localStorage.setItem("token", res.data);
                       dispatch(login(true));
+                      dispatch(loginUser(values));
                       navigate("/");
                     }
                   });
